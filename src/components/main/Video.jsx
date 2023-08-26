@@ -1,53 +1,33 @@
-export default function Video({video}){
-    // 2. This code loads the IFrame Player API code asynchronously.
-    const tag = document.createElement('script');
+import { useEffect, useState } from "react";
 
-    tag.src = "https://www.youtube.com/iframe_api";
-    let firstScriptTag = document.getElementsByTagName('script')[0];
-    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+/**
+ * Video()
+ * ---------------------
+ * a component where iframe api is placed.
+ */
+export default function Video({id}){
+    /** this state hook will be used to check the video is ready to render or not */
+    const [videoReady, setVideoReady] = useState(false);
 
-    // 3. This function creates an <iframe> (and YouTube player)
-    //    after the API code downloads.
-    let player;
-    function onYouTubeIframeAPIReady() {
-        player = new YT.Player('player', {
-          height: '390',
-          width: '640',
-          videoId: video.id.videoId,//'M7lc1UVf-VE',
-          playerVars: {
-            'playsinline': 1
-          },
-          events: {
-            'onReady': onPlayerReady,
-            'onStateChange': onPlayerStateChange
-          }
-        });
-    }
-
-    // 4. The API will call this function when the video player is ready.
-    function onPlayerReady(event) {
-        event.target.playVideo();
-    }
-
-    // 5. The API calls this function when the player's state changes.
-    //    The function indicates that when playing a video (state=1),
-    //    the player should play for six seconds and then stop.
-    let done = false;
-    function onPlayerStateChange(event) {
-        if (event.data == YT.PlayerState.PLAYING && !done) {
-            setTimeout(stopVideo, 6000);
-            done = true;
+    /** if video is not ready, change the hook to true */
+    useEffect(()=>{
+        if(id){
+            setVideoReady(true);
         }
-    }
-    function stopVideo() {
-        player.stopVideo();
-    }
+        else{
+            setVideoReady(false);
+        }
+    },[id]);
 
     return(
-        <iframe id="existing-iframe-example"
-            width="640" height="360"
-            src={`https://www.youtube.com/embed/M7lc1UVf-VE?enablejsapi=1`}
-            style={{border: "solid 4px #37474F"}}
-        ></iframe>  
+        <div>
+            {videoReady ? (
+                <iframe id="existing-iframe-example"
+                    width="640" height="360"
+                    src={`https://www.youtube.com/embed/${id}?enablejsapi=1`}
+                    style={{border: "solid 4px #37474F"}}
+                ></iframe>
+            ) : null}
+        </div>     
     )
 }

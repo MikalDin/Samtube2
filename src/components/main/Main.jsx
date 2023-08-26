@@ -1,29 +1,46 @@
-/**
- * Main()
- * ------------------------------
- * will render main page.
- * ToDo: need to set up the containers, and layout for the page.
- * @returns 
- */
-
-import { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react";
 import testAPI from "../../api/fetch";
-import Video from "./Video";
-import { Videolist } from "./Videolist";
+import VideoIndex from "./VideoIndex";
+import { useParams } from "react-router";
 
-export default function Main(){
-    const [videos, setVideos] = useState([]);
-    useEffect(()=>{
-        testAPI().then((response)=>response.json()).then((json)=>setVideos(json.items)).catch((err)=>console.error(err));
-    },[]);
-    return(
-        <div>
-            <Video video={videos[0]}/>
-            <p>
-                {videos.map((video)=>(<Videolist video={video}/>))}
-                
-            </p>
-            
-        </div>
-    )
+function Main() {
+  const [videos, setVideos] = useState([]);
+  const [videosLoaded, setVideosLoaded] = useState(false);
+  const { query } = useParams();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        let response;
+        if (!query) {
+          response = await testAPI();
+        } else {
+          response = await testAPI(8, query);
+        }
+
+        const json = await response.json();
+        setVideos(json.items);
+        setVideosLoaded(true);
+      } catch (err) {
+        console.error(err);
+        setVideosLoaded(false);
+      }
+    };
+
+    fetchData();
+  }, [query]);
+
+  return (
+    <main>
+      <div className="container-fluid mb-3">
+        {videosLoaded ? (
+          <VideoIndex videos={videos} />
+        ) : (
+          <p>Loading videos...</p>
+        )}
+      </div>
+    </main>
+  );
 }
+
+export default Main;
